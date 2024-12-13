@@ -1,27 +1,50 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, FlatList } from 'react-native';
 
 const StudentHomePage = () => {
+  // Example mess timetable data
+  const messTimetable = [
+    { day: 'Monday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+    { day: 'Tuesday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+    { day: 'Wednesday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+    { day: 'Thursday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+    { day: 'Friday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+    { day: 'Saturday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+    { day: 'Sunday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+  ];
+
+  const renderRow = ({ item }) => (
+    <View style={styles.row}>
+      <Text style={styles.cell}>{item.day}</Text>
+      <Text style={styles.cell}>{item.breakfast}</Text>
+      <Text style={styles.cell}>{item.lunch}</Text>
+      <Text style={styles.cell}>{item.dinner}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Student</Text>
+        <Text style={styles.headerText}>Welcome, Ram</Text>
       </View>
-      <View style={styles.welcomeText}>
-        <Text style={styles.welcome}>Welcome Ram</Text>
+      <View style={styles.tableContainer}>
+        <Text style={styles.tableHeader}>Mess Timetable</Text>
+        <View style={styles.table}>
+          {/* Table Header */}
+          <View style={styles.row}>
+            <Text style={styles.headerCell}>Day</Text>
+            <Text style={styles.headerCell}>Breakfast</Text>
+            <Text style={styles.headerCell}>Lunch</Text>
+            <Text style={styles.headerCell}>Dinner</Text>
+          </View>
+          {/* Table Data */}
+          <FlatList
+            data={messTimetable}
+            renderItem={renderRow}
+            keyExtractor={(item) => item.day}
+          />
+        </View>
       </View>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Feed Back</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Report an Issue</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Issues History</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>View-all Issues</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -29,40 +52,49 @@ const StudentHomePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#C8E6C9',
-    paddingHorizontal: 20,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginBottom: 20,
     alignItems: 'center',
-    marginTop: 30,
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#2E7D32',
   },
-  welcomeText: {
-    alignItems: 'center',
-    marginTop: 30,
+  tableContainer: {
+    marginTop: 20,
   },
-  welcome: {
-    fontSize: 28,
+  tableHeader: {
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#2E7D32',
+    marginBottom: 10,
   },
-  button: {
+  table: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+  },
+  cell: {
+    flex: 1,
+    padding: 10,
+    textAlign: 'center',
+  },
+  headerCell: {
+    flex: 1,
+    padding: 10,
+    textAlign: 'center',
+    fontWeight: 'bold',
     backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 20,
-    marginVertical: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 
