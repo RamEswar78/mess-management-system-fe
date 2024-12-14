@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, FlatList } from 'react-native';
 
 const backgroundImage = require('../../../assets/images/background.png'); // Local image
 
-const StudentHomePage = () => {
+const RepresentativePage = () => {
   const messTimetable = [
     { day: 'Monday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
     { day: 'Tuesday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
@@ -35,7 +35,7 @@ const StudentHomePage = () => {
 
       {/* Welcome Section */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Hello, Student</Text>
+        <Text style={styles.headerText}>Hello, Mess Representative</Text>
       </View>
 
       {/* Mess Timetable Section */}
@@ -154,4 +154,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StudentHomePage;
+export default RepresentativePage;
