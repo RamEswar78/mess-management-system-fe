@@ -1,17 +1,63 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, Platform } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { PermissionsAndroid } from 'react-native'; // Import PermissionsAndroid for runtime permission
 
 const ReportIssue = () => {
   const [issueType, setIssueType] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
 
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission Required',
+            message: 'This app needs access to your storage to select images.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    return true; // iOS permissions are handled in Info.plist
+  };
+
+  const handleImageUpload = async () => {
+    const permissionGranted = await requestStoragePermission();
+    if (!permissionGranted) {
+      Alert.alert('Permission Denied', 'Storage access is required to upload images.');
+      return;
+    }
+
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.error('Image Picker Error:', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        setImage(response.assets[0].uri); // Set the selected image URI
+      }
+    });
+  };
+
   const handleSubmit = () => {
-    // Submit the report to your backend
     console.log('Issue Type:', issueType);
     console.log('Description:', description);
     console.log('Image:', image);
-    alert("successfully submitted");
+    Alert.alert('Success', 'Your issue has been reported.');
   };
 
   return (
@@ -31,16 +77,20 @@ const ReportIssue = () => {
         <Text style={styles.label}>Description</Text>
         <TextInput
           style={styles.input}
-          multiline={true}
+          multiline
           numberOfLines={4}
           onChangeText={setDescription}
           value={description}
         />
       </View>
 
-      <TouchableOpacity style={styles.uploadButton} onPress={() => {}}>
+      <TouchableOpacity style={styles.uploadButton} onPress={handleImageUpload}>
         <Text style={styles.uploadButtonText}>Upload Image</Text>
       </TouchableOpacity>
+
+      {image && (
+        <Image source={{ uri: image }} style={styles.uploadedImage} />
+      )}
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit</Text>
@@ -70,7 +120,8 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10, borderRadius: 5,
+    padding: 10,
+    borderRadius: 5,
     backgroundColor: '#fff',
   },
   uploadButton: {
@@ -83,6 +134,13 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  uploadedImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   submitButton: {
     backgroundColor: '#28A745',

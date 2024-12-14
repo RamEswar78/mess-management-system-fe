@@ -1,50 +1,83 @@
-import { AppRegistry } from 'react-native';
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { View, Text } from 'react-native';
-import StudentHomePage from '../src/screens/Student/Student'; // Ensure the correct path to StudentHomePage
-import FeedbackForm from '../src/screens/Student/FeedbackScreen'; // Ensure the correct path to StudentHomePage
-import { expo } from '../app.json';  // Import the entire expo configuration from app.json
-import ReportIssue from '../src/screens/Student/IssueReportScreen';
-import IssueHistory from '../src/screens/Student/HistoryScreen';
-import AllIssues from '../src/screens/Student/AllIssuesScreen';
+import { NavigationContainer } from '@react-navigation/native'; // This is correct
+import { createStackNavigator } from '@react-navigation/stack';
+import { SessionProvider } from '../src/SessionContext';
+import LoginPage from '../src/screens/Auth/LoginScreen';
+import RegisterPage from '../src/screens/Auth/RegisterScreen';
+import StudentPage from '../app/StudentPage';
+import MRPage from '../app/MRPage';
+import CoordinatorPage from '../app/CoordinatorPage'
+import Admin from '../src/screens/Admin'
 
-// Extract the app name from the expo configuration
-const { name: appName } = expo;
+import RepresentativePage from '@/src/screens/Representative/RepresentativePage';
 
-// Create a Drawer Navigator
-const Drawer = createDrawerNavigator();
+import {PermissionsAndroid} from 'react-native';
+
+async function requestStoragePermission() {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      {
+        title: 'Storage Permission',
+        message: 'This app needs access to your storage to upload files.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You can access the storage');
+    } else {
+      console.log('Storage permission denied');
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
+requestStoragePermission();
+
+const Stack = createStackNavigator();
 
 
-// Main App Component with Drawer Navigator
 const App = () => {
+
   return (
-    <Drawer.Navigator
-      initialRouteName="StudentHome"
-      screenOptions={{
-        drawerType: 'slide', // Use 'slide' to animate the drawer opening/closing
-        drawerStyle: {
-          backgroundColor: '#fff', // Customize the drawer background
-          width: 240, // Set the width of the drawer
-            shadowColor: '#000', // Shadow for the drawer
-            shadowOpacity: 0.8, 
-            shadowRadius: 8,
-        },
-        overlayColor: 'rgba(0,0,0,0.5)', // Make the overlay semi-transparent
-        drawerPosition: 'left', // Position of the drawer (left or right)
-      }}
-    >
-      <Drawer.Screen name="StudentHome" component={StudentHomePage} />
-      <Drawer.Screen name="Feedback" component={FeedbackForm} />
-      <Drawer.Screen name="Report Issue" component={ReportIssue} />
-      <Drawer.Screen name="View History" component={IssueHistory} />
-      <Drawer.Screen name="Similar Issues" component={AllIssues} />
-    </Drawer.Navigator>
+    <SessionProvider>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen 
+            name="Login" 
+            component={LoginPage} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="StudentPage" 
+            component={StudentPage} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="MRPage" 
+            component={MRPage} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Register" 
+            component={RegisterPage} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Admin" 
+            component={Admin} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Coordinator" 
+            component={CoordinatorPage} 
+            options={{ headerShown: false }} 
+          />
+        </Stack.Navigator>
+    </SessionProvider>
   );
 };
 
-// Wrapping Drawer Navigator inside NavigationContainer (Only in root, no other containers)
-
-// Register the main App component
 export default App;
