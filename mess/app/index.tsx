@@ -1,5 +1,4 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native'; // This is correct
 import { createStackNavigator } from '@react-navigation/stack';
 import { SessionProvider } from '../src/SessionContext';
 import LoginPage from '../src/screens/Auth/LoginScreen';
@@ -7,38 +6,11 @@ import RegisterPage from '../src/screens/Auth/RegisterScreen';
 import StudentPage from '../app/StudentPage';
 import MRPage from '../app/MRPage';
 import CoordinatorPage from '../app/CoordinatorPage'
-import Admin from '../src/screens/Admin'
-
-import RepresentativePage from '@/src/screens/Representative/RepresentativePage';
-
-import {PermissionsAndroid} from 'react-native';
-
-async function requestStoragePermission() {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-      {
-        title: 'Storage Permission',
-        message: 'This app needs access to your storage to upload files.',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      },
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('You can access the storage');
-    } else {
-      console.log('Storage permission denied');
-    }
-  } catch (err) {
-    console.warn(err);
-  }
-}
-
-requestStoragePermission();
+import AdminPage from '../app/AdminPage'
+import Director from '../app/Director'
+import AdministrativeOfficer from '../src/screens/AdministrativeOfficer/AdministrativeOfficer'
 
 const Stack = createStackNavigator();
-
 
 const App = () => {
 
@@ -67,12 +39,22 @@ const App = () => {
           />
           <Stack.Screen 
             name="Admin" 
-            component={Admin} 
+            component={AdminPage} 
             options={{ headerShown: false }} 
           />
           <Stack.Screen 
             name="Coordinator" 
             component={CoordinatorPage} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Director" 
+            component={Director} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="AO" 
+            component={AdministrativeOfficer} 
             options={{ headerShown: false }} 
           />
         </Stack.Navigator>

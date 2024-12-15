@@ -3,35 +3,47 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image } from 'reac
 import { useSession } from '../../SessionContext'; // Import context
 
 
+
 const LoginPage = ({ navigation }) => {
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useSession(); // Access the login function from context
   const role = 'student';
   const role2 = 'mess representative';
   const role3 = 'admin';
-  const role4 = 'coordinator'
+  const role4 = 'coordinator';
+  const role5 = 'director';
+  const role6 = 'AO';
   const handleLogin = () => {
-    if (email === 'abcd' && password === '123' && role==='student') {
+    if (email === 'student@gmail.com' && password === '123' && role==='student') {
       console.log('Login successful');
       login({ role }); // Update session context with user data
       // console.log(user.role);
-      navigation.navigate('StudentPage');
+      navigation.replace('StudentPage');
     } 
-    else if(email==='efg' && password==='098' && role2==='mess representative'){
+    else if(email==='messrep@gmail.com' && password==='098' && role2==='mess representative'){
       console.log('Login successful');
       login({ role2 }); // Update session context with user data
-      navigation.navigate('MRPage');
+      navigation.replace('MRPage');
     }
-    else if(email==='neeraj' && password==='kalki' && role3==='admin'){
+    else if(email==='neeraj@gmail.com' && password==='kalki' && role3==='admin'){
       console.log('Login successful');
       login({ role3 }); // Update session context with user data
-      navigation.navigate('Admin');
+      navigation.replace('Admin');
     }
-    else if(email==='ram' && password==='ramu' && role4==='coordinator'){
+    else if(email==='ram@gmail.com' && password==='ramu' && role4==='coordinator'){
       console.log('Login successful');
       login({ role4 }); // Update session context with user data
-      navigation.navigate('Coordinator');
+      navigation.replace('Coordinator');
+    }
+    else if(email==='director@gmail.com' && password==='director' && role5==='director'){
+      login({ role5 });
+      navigation.replace('Director');
+    }
+    else if(email==='ao@gmail.com' && password==='ao' && role5==='AO'){
+      login({ role6 });
+      navigation.replace('AO');
     }
     else {
       alert('Invalid email or password');
@@ -73,7 +85,7 @@ const LoginPage = ({ navigation }) => {
             <Text style={styles.linkText}>Forgot Password</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.linkText}>Register</Text> {/* Use navigation to go to Register page */}
+            <Text style={styles.linkText}>Register</Text> 
           </TouchableOpacity>
         </View>
       </View>
