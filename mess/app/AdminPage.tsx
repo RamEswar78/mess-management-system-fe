@@ -1,21 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import Admin from "../src/screens/Admin/Admin";
+import ViewMessRepresentative from "../src/screens/Admin/ViewMessRepresentative";
+import ViewMessSupervisor from "../src/screens/Admin/ViewSupervisors";
+import ViewStudents from "../src/screens/Admin/ViewStudents";
+import { useSession } from "../src/SessionContext";
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
-import { useSession } from "../src/SessionContext"; // Import session context
-import CoordinatorHome from "../src/screens/Coordinator/Coordinator";
-import ViewIssues from "../src/screens/Coordinator/ViewIssues";
-import RequestInspections from "../src/screens/Coordinator/RequestInspections";
-import ViewInspectionReport from "../src/screens/Coordinator/ViewInspectionReport";
-import { DrawerNavigationProp } from "@react-navigation/drawer";
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import AssignMess from '../src/screens/Admin/AssignMess'
 
 const Drawer = createDrawerNavigator();
 
-type AppNavigatorNavigationProp = DrawerNavigationProp<any>; // Define navigation prop type for AppNavigator
+type AdminPageNavigationProp = DrawerNavigationProp<any>; 
 
 const CustomDrawerContent = (props: any) => {
-  const { logout } = useSession(); // Access logout function from session context
-  const { navigation }: { navigation: AppNavigatorNavigationProp } = props; // Type the navigation prop
+  const { logout } = useSession();
+  const { navigation }: { navigation: AdminPageNavigationProp } = props;
 
   const handleLogout = () => {
     logout(); // Clear session data
@@ -45,11 +46,19 @@ const CustomDrawerContent = (props: any) => {
   );
 };
 
-const AppNavigator = () => {
+const AdminPage = () => {
+  const { user, logout } = useSession();
+  console.log(user);
+
+  useEffect(() => {
+    if (!user) {
+      console.log("User is not logged in.");
+    }
+  }, [user]);
+
   return (
     <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawerContent {...props} />} // Custom Drawer Content
-      screenOptions={{
+    screenOptions={{
         headerTitle: 'Menu', // Set header title as 'Menu' for each screen
         drawerStyle: {
           backgroundColor: '#fff',
@@ -68,10 +77,11 @@ const AppNavigator = () => {
           fontWeight: 'bold', // Make title bold
         },
       }}
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen
         name="Home"
-        component={CoordinatorHome}
+        component={Admin}
         options={{
           drawerIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
@@ -79,29 +89,38 @@ const AppNavigator = () => {
         }}
       />
       <Drawer.Screen
-        name="View Issues"
-        component={ViewIssues}
+        name="View Mess Representative"
+        component={ViewMessRepresentative}
         options={{
           drawerIcon: ({ color, size }) => (
-            <MaterialIcons name="report-problem" size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />
       <Drawer.Screen
-        name="Request Inspections"
-        component={RequestInspections}
+        name="View Supervisors"
+        component={ViewMessSupervisor}
         options={{
           drawerIcon: ({ color, size }) => (
-            <Ionicons name="clipboard-outline" size={size} color={color} />
+            <Ionicons name="people-outline" size={size} color={color} />
           ),
         }}
       />
       <Drawer.Screen
-        name="View Inspection Reports"
-        component={ViewInspectionReport}
+        name="View Students"
+        component={ViewStudents}
         options={{
           drawerIcon: ({ color, size }) => (
-            <Ionicons name="clipboard-outline" size={size} color={color} />
+            <Ionicons name="school-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="AssingnMess"
+        component={AssignMess}
+        options={{
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="school-outline" size={size} color={color} />
           ),
         }}
       />
@@ -109,4 +128,4 @@ const AppNavigator = () => {
   );
 };
 
-export default AppNavigator;
+export default AdminPage;

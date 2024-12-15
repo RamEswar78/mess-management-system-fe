@@ -5,8 +5,8 @@ import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navi
 import { useSession } from "../src/SessionContext"; // Import session context
 import CoordinatorHome from "../src/screens/Coordinator/Coordinator";
 import ViewIssues from "../src/screens/Coordinator/ViewIssues";
-import RequestInspections from "../src/screens/Coordinator/RequestInspections";
-import ViewInspectionReport from "../src/screens/Coordinator/ViewInspectionReport";
+import Director from "../src/screens/Director/Director"
+import Feedback from '../src/screens/Director/Feedback'
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 
 const Drawer = createDrawerNavigator();
@@ -69,18 +69,10 @@ const AppNavigator = () => {
         },
       }}
     >
+      
       <Drawer.Screen
-        name="Home"
-        component={CoordinatorHome}
-        options={{
-          drawerIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Drawer.Screen
-        name="View Issues"
-        component={ViewIssues}
+        name="Issues"
+        component={Director}
         options={{
           drawerIcon: ({ color, size }) => (
             <MaterialIcons name="report-problem" size={size} color={color} />
@@ -88,20 +80,11 @@ const AppNavigator = () => {
         }}
       />
       <Drawer.Screen
-        name="Request Inspections"
-        component={RequestInspections}
+        name="Feedback"
+        component={Feedback}
         options={{
           drawerIcon: ({ color, size }) => (
-            <Ionicons name="clipboard-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Drawer.Screen
-        name="View Inspection Reports"
-        component={ViewInspectionReport}
-        options={{
-          drawerIcon: ({ color, size }) => (
-            <Ionicons name="clipboard-outline" size={size} color={color} />
+            <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
       />

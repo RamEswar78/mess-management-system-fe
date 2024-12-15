@@ -14,9 +14,8 @@ const ReportIssue = () => {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           {
-            title: 'Storage Permission Required',
-            message: 'This app needs access to your storage to select images.',
-            buttonNeutral: 'Ask Me Later',
+            title: 'Storage Permission',
+            message: 'This app needs access to your storage to upload images.',
             buttonNegative: 'Cancel',
             buttonPositive: 'OK',
           }
@@ -27,8 +26,9 @@ const ReportIssue = () => {
         return false;
       }
     }
-    return true; // iOS permissions are handled in Info.plist
+    return true; // Permission is automatically granted on iOS
   };
+  
 
   const handleImageUpload = async () => {
     const permissionGranted = await requestStoragePermission();
@@ -36,12 +36,12 @@ const ReportIssue = () => {
       Alert.alert('Permission Denied', 'Storage access is required to upload images.');
       return;
     }
-
+  
     const options = {
       mediaType: 'photo',
       quality: 1,
     };
-
+  
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -52,6 +52,7 @@ const ReportIssue = () => {
       }
     });
   };
+  
 
   const handleSubmit = () => {
     console.log('Issue Type:', issueType);
