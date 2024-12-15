@@ -9,6 +9,9 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "notification": {
+      "vapidPublicKey": "BPs7317aPs-3XEJKEVW5U4GPdopAQt7tAD-KGAcmZxaQHNFKQXDu6_P-BJfWugXQC8yWjUeQNAGq1uKbqHnNtOA"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -16,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.starlord78.mess"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +41,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "abadd6a5-470b-474b-8bed-bc3042dea32a"
+      }
     }
   }
 }

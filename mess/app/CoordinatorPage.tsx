@@ -29,7 +29,7 @@ const AppNavigator = () => {
           ),
         }}
       />
-      
+
       <Drawer.Screen
         name="Request Inspections"
         component={RequestInspections}

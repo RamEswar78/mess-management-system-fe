@@ -1,113 +1,182 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from "react-native";
+import Slider from "@react-native-community/slider";
+import axios from "axios";
+import { useSession } from "../../SessionContext"; // Adjust the path as necessary
 
 const QualityInspectionPage = () => {
-  const [inspectionData, setInspectionData] = useState([]);
-  const [foodItem, setFoodItem] = useState('');
-  const [qualityRating, setQualityRating] = useState('');
+  const { user } = useSession(); // Access the session context
+  const [ratings, setRatings] = useState({
+    QualityAndExpiry: 2.5,
+    StandardsOfMaterials: 2.5,
+    StaffAndFoodAdequacy: 2.5,
+    MenuDiscrepancies: 2.5,
+    SupervisorUpdates: 2.5,
+    FoodTasteAndQuality: 2.5,
+    KitchenHygiene: 2.5,
+    UtensilCleanliness: 2.5,
+    ServiceTimingsAdherence: 2.5,
+  });
+  const [comments, setComments] = useState("");
+  const [messNo, setMessNo] = useState("");
 
-  const handleAddInspection = () => {
-    if (foodItem.trim() === '' || qualityRating.trim() === '') {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleRatingChange = (category, value) => {
+    setRatings((prevRatings) => ({
+      ...prevRatings,
+      [category]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (!messNo) {
+      Alert.alert("Error", "Please fill in the Mess Number.");
       return;
     }
 
-    const newInspection = {
-      id: Math.random().toString(),
-      foodItem,
-      qualityRating,
-    };
+    if (!user || !user.id) {
+      Alert.alert("Error", "User not logged in.");
+      return;
+    }
 
-    setInspectionData((prevData) => [...prevData, newInspection]);
-    setFoodItem('');
-    setQualityRating('');
+    const payload = {
+      messNo: messNo,
+      mrId: 5, // Use the logged-in user's ID
+      ...ratings,
+      Comments: comments,
+    };
+    console.log(payload);
+    try {
+      const response = await axios.post(
+        "https://mess-management-system-be-1.onrender.com/complaints/inspection",
+        payload
+      );
+
+      if (response.data) {
+        Alert.alert("Success", "Quality inspection submitted successfully!");
+        setRatings({
+          QualityAndExpiry: 2.5,
+          StandardsOfMaterials: 2.5,
+          StaffAndFoodAdequacy: 2.5,
+          MenuDiscrepancies: 2.5,
+          SupervisorUpdates: 2.5,
+          FoodTasteAndQuality: 2.5,
+          KitchenHygiene: 2.5,
+          UtensilCleanliness: 2.5,
+          ServiceTimingsAdherence: 2.5,
+        });
+        setComments("");
+        setMessNo("");
+      } else {
+        Alert.alert("Error", "Failed to submit the quality inspection.");
+      }
+    } catch (error) {
+      console.error("Error submitting quality inspection:", error);
+      Alert.alert("Error", "An error occurred while submitting the data.");
+    }
   };
 
-  const renderInspectionItem = ({ item }) => (
-    <View style={styles.inspectionItem}>
-      <Text style={styles.inspectionText}>Food Item: {item.foodItem}</Text>
-      <Text style={styles.inspectionText}>Quality Rating: {item.qualityRating}</Text>
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Quality Inspection</Text>
+
       <TextInput
         style={styles.input}
-        placeholder="Food Item"
-        value={foodItem}
-        onChangeText={setFoodItem}
+        placeholder="Mess Number"
+        value={messNo}
+        onChangeText={setMessNo}
       />
+
+      {Object.keys(ratings).map((category) => (
+        <View key={category} style={styles.categoryContainer}>
+          <Text style={styles.categoryText}>
+            {category.replace(/([A-Z])/g, " $1")}
+          </Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={5}
+            step={0.1}
+            value={ratings[category]}
+            onValueChange={(value) => handleRatingChange(category, value)}
+          />
+          <Text style={styles.ratingValue}>Rating: {ratings[category]}</Text>
+        </View>
+      ))}
+
       <TextInput
-        style={styles.input}
-        placeholder="Quality Rating (1-5)"
-        value={qualityRating}
-        onChangeText={setQualityRating}
-        keyboardType="numeric"
+        style={[styles.input, styles.textArea]}
+        placeholder="Comments"
+        value={comments}
+        onChangeText={setComments}
+        multiline
       />
-      <TouchableOpacity style={styles.button} onPress={handleAddInspection}>
-        <Text style={styles.buttonText}>Add Inspection</Text>
+
+      <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+        <Text style={styles.submitText}>Submit</Text>
       </TouchableOpacity>
-      <FlatList
-        data={inspectionData}
-        renderItem={renderInspectionItem}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-      />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f9f9f9",
+    flexGrow: 1,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1E7C2F',
-    textAlign: 'center',
+    fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
   },
   input: {
-    height: 50,
-    borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
     marginBottom: 15,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
-  button: {
-    backgroundColor: '#1E7C2F',
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
+  textArea: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  categoryContainer: {
     marginBottom: 20,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  list: {
-    marginTop: 20,
-  },
-  inspectionItem: {
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-  },
-  inspectionText: {
+  categoryText: {
     fontSize: 16,
-    color: '#333',
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  slider: {
+    width: "100%",
+    height: 40,
+  },
+  ratingValue: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 5,
+  },
+  submitButton: {
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  submitText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

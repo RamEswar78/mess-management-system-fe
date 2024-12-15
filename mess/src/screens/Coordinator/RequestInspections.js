@@ -16,7 +16,7 @@ const RequestInspection = () => {
 
   const handleRequestInspection = () => {
     if (selectedMess && description) {
-      console.log(
+      alert(
         `Inspection requested for ${selectedMess} with description: ${description}`
       );
       // Add further logic to notify mess representatives or update the backend

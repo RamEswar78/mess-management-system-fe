@@ -1,199 +1,302 @@
 import React, { useState, useEffect } from "react";
 import {
-  FlatList,
-  Text,
   View,
+  Text,
   StyleSheet,
-  Modal,
   TouchableOpacity,
-  Button,
+  Alert,
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker"; // Updated Picker
-import * as Notifications from "expo-notifications"; // Expo notifications
-import * as Device from "expo-device"; // Expo device info
+import Icon from "react-native-vector-icons/Ionicons";
+import axios from "axios";
 
-import RequestInspection from "./RequestInspections"; // Import RequestInspection component
+const IssueItem = React.memo(({ id, title, status, onResolve, onPress }) => {
+  return (
+    <View style={styles.issueItem}>
+      <TouchableOpacity onPress={onPress} style={styles.issueContent}>
+        <Text style={styles.issueTitle}>{title}</Text>
+        <Text style={styles.issueStatus}>{status}</Text>
+      </TouchableOpacity>
+      <View style={styles.resolveContainer}>
+        <TouchableOpacity onPress={onResolve}>
+          <Icon name="checkmark-circle-outline" size={24} color="#28a745" />
+        </TouchableOpacity>
+        <Text style={styles.resolveText}>Resolve</Text>
+      </View>
+    </View>
+  );
+});
 
-const ViewIssues = () => {
-  const [issues, setIssues] = useState([
-    {
-      id: 1,
-      title: "Issue 1",
-      description: "Description of Issue 1",
-      status: "Open",
-      count: 2,
-    },
-    {
-      id: 2,
-      title: "Issue 2",
-      description: "Description of Issue 2",
-      status: "Resolved",
-      count: 1,
-    },
-    {
-      id: 3,
-      title: "Issue 3",
-      description: "Description of Issue 3",
-      status: "Open",
-      count: 3,
-    },
-  ]);
-
+const AllIssues = () => {
+  const [issues, setIssues] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [filter, setFilter] = useState("All");
-  const [notificationCount, setNotificationCount] = useState(0);
-  const [deviceInfo, setDeviceInfo] = useState(null);
-  const [permissionGranted, setPermissionGranted] = useState(false);
 
+  // Fetch issues with pagination
   useEffect(() => {
-    // Fetch device information
-    const deviceDetails = Device.deviceName;
-    setDeviceInfo(deviceDetails);
+    const fetchIssues = async () => {
+      if (loading || !hasMore) return;
 
-    // Request notification permissions
-    Notifications.requestPermissionsAsync().then((status) =>
-      setPermissionGranted(status.granted)
-    );
-  }, []);
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `https://mess-management-system-be-1.onrender.com/complaints/issues?page=${page}&limit=20`
+        );
 
-  const openModal = (issue) => {
+        const issuesData = response.data.issues;
+
+        if (Array.isArray(issuesData)) {
+          const newIssues = issuesData.filter(
+            (newIssue) =>
+              !issues.some(
+                (existingIssue) => existingIssue.issueId === newIssue.issueId
+              )
+          );
+
+          setIssues((prevIssues) => [...prevIssues, ...newIssues]);
+          setHasMore(newIssues.length > 0);
+        } else {
+          console.error("Unexpected response format:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching issues:", error);
+        Alert.alert("Error", "Failed to fetch issues from the server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIssues();
+  }, [page]);
+
+  const handleLoadMore = () => {
+    if (hasMore && !loading) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  const handleResolve = async (id, index) => {
+    try {
+      const res = await axios.put(
+        `https://mess-management-system-be-1.onrender.com/complaints/issues/status/${id}`,
+        { status: "resolved" }
+      );
+
+      if (res.data.success) {
+        setIssues((prevIssues) => {
+          const updatedIssues = [...prevIssues];
+          updatedIssues[index] = {
+            ...updatedIssues[index],
+            status: "Resolved",
+          };
+          return updatedIssues;
+        });
+
+        Alert.alert("Success", "Issue marked as resolved.");
+      } else {
+        Alert.alert("Error", "Failed to resolve the issue. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error updating issue status:", error);
+      Alert.alert("Error", "Failed to update the issue status.");
+    }
+  };
+
+  const openIssueModal = (issue) => {
     setSelectedIssue(issue);
     setModalVisible(true);
   };
 
   const closeModal = () => {
-    setSelectedIssue(null);
     setModalVisible(false);
+    setSelectedIssue(null);
   };
-
-  const resolveIssue = () => {
-    setIssues((prevIssues) =>
-      prevIssues.map((issue) =>
-        issue.id === selectedIssue.id ? { ...issue, status: "Resolved" } : issue
-      )
-    );
-    sendNotification();
-    closeModal();
-  };
-
-  // Send notification when an issue is resolved
-  const sendNotification = () => {
-    if (permissionGranted) {
-      Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Issue Resolved!",
-          body: `The issue '${selectedIssue.title}' has been marked as resolved.`,
-        },
-        trigger: null,
-      });
-      setNotificationCount(notificationCount + 1); // Increment notification count
-    }
-  };
-
-  const filteredIssues = issues
-    .filter((issue) => (filter === "All" ? true : issue.status === filter))
-    .sort((a, b) => b.count - a.count);
 
   return (
     <View style={styles.container}>
-      <Text>Device: {deviceInfo}</Text>
-      <Text>Notification Count: {notificationCount}</Text>
-
-      <Picker
-        selectedValue={filter}
-        onValueChange={(value) => setFilter(value)}
-        style={styles.picker}
-      >
-        <Picker.Item label="All" value="All" />
-        <Picker.Item label="Open" value="Open" />
-        <Picker.Item label="Resolved" value="Resolved" />
-      </Picker>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Student</Text>
+        <Icon name="ellipsis-vertical" size={24} color="#000" />
+      </View>
+      <Text style={styles.title}>All Issues</Text>
 
       <FlatList
-        data={filteredIssues}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => openModal(item)}>
-            <View style={styles.issueCard}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text>Status: {item.status}</Text>
-              <Text>Count: {item.count}</Text>
-            </View>
-          </TouchableOpacity>
+        data={issues}
+        renderItem={({ item, index }) => (
+          <IssueItem
+            key={item.issueId}
+            id={item.issueId}
+            title={item.description}
+            status={item.status}
+            onResolve={() => handleResolve(item.issueId, index)}
+            onPress={() => openIssueModal(item)}
+          />
         )}
+        keyExtractor={(item) => item.issueId.toString()}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={
+          loading ? <ActivityIndicator size="large" color="#007bff" /> : null
+        }
       />
 
       <Modal
         visible={modalVisible}
+        onRequestClose={closeModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={closeModal}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {selectedIssue && (
-              <>
-                <Text style={styles.modalTitle}>{selectedIssue.title}</Text>
-                <Text style={styles.modalDescription}>
-                  {selectedIssue.description}
-                </Text>
-                <Text>Status: {selectedIssue.status}</Text>
-                <Text>Count: {selectedIssue.count}</Text>
-
-                {selectedIssue.status === "Open" && (
-                  <Button
-                    title="Resolve"
-                    onPress={resolveIssue}
-                    color="green"
-                  />
-                )}
-                <Button title="Close" onPress={closeModal} color="red" />
-              </>
-            )}
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              {selectedIssue && (
+                <>
+                  <Text style={styles.modalTitle}>Issue Details</Text>
+                  <Text style={styles.modalContent}>
+                    <Text style={styles.modalSubTitle}>Description: </Text>
+                    {selectedIssue.description}
+                  </Text>
+                  <Text style={styles.modalContent}>
+                    <Text style={styles.modalSubTitle}>Status: </Text>
+                    {selectedIssue.status}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={closeModal}
+                    style={styles.modalCloseButton}
+                  >
+                    <Text style={styles.modalCloseText}>Close</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Call RequestInspection component without props */}
-      <RequestInspection />
+      {hasMore && !loading && (
+        <TouchableOpacity
+          onPress={handleLoadMore}
+          style={styles.loadMoreButton}
+        >
+          <Text style={styles.loadMoreText}>Load More</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  picker: {
-    height: 50,
-    width: "100%",
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 4,
+  container: {
+    flex: 1,
+    backgroundColor: "#f2f2f2",
+    padding: 20,
   },
-  issueCard: {
-    padding: 16,
-    marginVertical: 8,
-    backgroundColor: "#f9f9f9",
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  issueItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    marginBottom: 10,
+    backgroundColor: "#fff",
     borderRadius: 8,
-    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  title: { fontSize: 16, fontWeight: "bold" },
-  modalContainer: {
+  issueContent: {
+    flex: 1,
+  },
+  issueTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  issueStatus: {
+    fontSize: 14,
+    color: "#888",
+  },
+  resolveContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  resolveText: {
+    marginLeft: 5,
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#28a745",
+  },
+  loadMoreButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#007bff",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  loadMoreText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  modalContent: {
+  modalContainer: {
     width: "80%",
-    padding: 20,
     backgroundColor: "#fff",
     borderRadius: 8,
-    elevation: 5,
+    padding: 20,
+    alignItems: "center",
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-  modalDescription: { fontSize: 16, marginBottom: 20 },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalContent: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  modalSubTitle: {
+    fontWeight: "bold",
+  },
+  modalCloseButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#007bff",
+    borderRadius: 5,
+  },
+  modalCloseText: {
+    color: "#fff",
+    fontSize: 16,
+  },
 });
 
-export default ViewIssues;
+export default AllIssues;

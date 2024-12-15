@@ -1,63 +1,104 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, Platform } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { PermissionsAndroid } from 'react-native'; // Import PermissionsAndroid for runtime permission
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Alert,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
+import { useSession } from "../../SessionContext";
+import axios from "axios";
 
 const ReportIssue = () => {
-  const [issueType, setIssueType] = useState('');
-  const [description, setDescription] = useState('');
+  const { user } = useSession(); // Access session data
+  const [role, setRole] = useState(null);
+  const [issueType, setIssueType] = useState("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
 
-  const requestStoragePermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission Required',
-            message: 'This app needs access to your storage to select images.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn(err);
-        return false;
-      }
+  useEffect(() => {
+    if (user) {
+      setRole(user.role);
+      console.log("User session loaded:", user); // Log session data
+    } else {
+      Alert.alert("Error", "No session found! Please log in again.");
     }
-    return true; // iOS permissions are handled in Info.plist
+  }, [user]);
+
+  // Function to handle image upload using expo-image-picker and compress it
+  const handleImageUpload = async () => {
+    try {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Permission to access media library is required to upload images."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Only images
+        allowsEditing: true, // Enable cropping
+        quality: 1, // Maximum image quality
+      });
+
+      if (!result.canceled) {
+        // Compress the image
+        const compressedImage = await ImageManipulator.manipulateAsync(
+          result.assets[0].uri,
+          [{ resize: { width: 800 } }], // Resize the image to a max width of 800px
+          { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG } // Compress to 50% quality
+        );
+
+        setImage(compressedImage.uri); // Set the compressed image URI
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      Alert.alert("Error", "Failed to upload image.");
+    }
   };
 
-  const handleImageUpload = async () => {
-    const permissionGranted = await requestStoragePermission();
-    if (!permissionGranted) {
-      Alert.alert('Permission Denied', 'Storage access is required to upload images.');
+  const handleSubmit = async () => {
+    if (!issueType || !description) {
+      Alert.alert("Error", "Please fill in all the fields.");
       return;
     }
 
-    const options = {
-      mediaType: 'photo',
-      quality: 1,
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorMessage) {
-        console.error('Image Picker Error:', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        setImage(response.assets[0].uri); // Set the selected image URI
+    try {
+      const formData = new FormData();
+      formData.append("description", description);
+      formData.append("category", issueType);
+      formData.append("userId", user.id);
+      if (image) {
+        formData.append("image", {
+          uri: image,
+          name: "uploaded_image.jpg",
+          type: "image/jpeg",
+        });
       }
-    });
-  };
 
-  const handleSubmit = () => {
-    console.log('Issue Type:', issueType);
-    console.log('Description:', description);
-    console.log('Image:', image);
-    Alert.alert('Success', 'Your issue has been reported.');
+      const response = await axios.post(
+        "https://mess-management-system-be-1.onrender.com/student/issues",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Response:", response.data);
+      Alert.alert("Success", "Your issue has been reported.");
+    } catch (error) {
+      console.error("API error:", error);
+      Alert.alert("Error", "Failed to report the issue. Please try again.");
+    }
   };
 
   return (
@@ -88,9 +129,7 @@ const ReportIssue = () => {
         <Text style={styles.uploadButtonText}>Upload Image</Text>
       </TouchableOpacity>
 
-      {image && (
-        <Image source={{ uri: image }} style={styles.uploadedImage} />
-      )}
+      {image && <Image source={{ uri: image }} style={styles.uploadedImage} />}
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit</Text>
@@ -102,12 +141,12 @@ const ReportIssue = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
     padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   inputContainer: {
@@ -119,37 +158,37 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   uploadButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: "#007BFF",
     padding: 10,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   uploadButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
   uploadedImage: {
     width: 200,
     height: 200,
-    resizeMode: 'contain',
-    alignSelf: 'center',
+    resizeMode: "contain",
+    alignSelf: "center",
     marginBottom: 20,
   },
   submitButton: {
-    backgroundColor: '#28A745',
+    backgroundColor: "#28A745",
     padding: 12,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   submitButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
 });

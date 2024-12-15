@@ -25,7 +25,6 @@ const StudentHomePage = () => {
 
   return (
     <View style={styles.container}>
-      {/* Logo and Title Section */}
       <View style={styles.logoContainer}>
         <View style={styles.logo}>
           <Image source={require('../../../assets/images/rgulogo2.png')} style={styles.logoImage} />
@@ -33,23 +32,19 @@ const StudentHomePage = () => {
         <Text style={styles.title}>Mess Complaint Management System</Text>
       </View>
 
-      {/* Welcome Section */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Hello, Student</Text>
       </View>
 
-      {/* Mess Timetable Section */}
       <View style={styles.tableContainer}>
         <Text style={styles.tableHeader}>Mess Timetable</Text>
         <View style={styles.table}>
-          {/* Table Header */}
           <View style={styles.row}>
             <Text style={styles.headerCell}>Day</Text>
             <Text style={styles.headerCell}>Breakfast</Text>
             <Text style={styles.headerCell}>Lunch</Text>
             <Text style={styles.headerCell}>Dinner</Text>
           </View>
-          {/* Table Data */}
           <FlatList
             data={messTimetable}
             renderItem={renderRow}

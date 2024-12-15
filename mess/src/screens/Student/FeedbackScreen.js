@@ -1,160 +1,181 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import axios from "axios";
+import { useSession } from "../../SessionContext"; // Adjust the path as necessary
 
 const FeedbackForm = () => {
-  const [feedback, setFeedback] = useState({
-    surroundings: null,
-    timings: null,
-    taste: null,
-  });
+  const categories = [
+    "messNo",
+    "TimelinessOfService",
+    "CleanlinessOfDiningHall",
+    "FoodQuality",
+    "QuantityOfFood",
+    "CourtesyOfStaff",
+    "StaffHygiene",
+    "MenuAdherence",
+    "WashAreaCleanliness",
+    "Comments",
+  ];
+
+  const [feedback, setFeedback] = useState(
+    categories.reduce((acc, category) => {
+      acc[category] = null;
+      return acc;
+    }, {})
+  );
+  const { user } = useSession(); // Access session data
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      setRole(user.role);
+      console.log("User session loaded:", user); // Log session data
+    } else {
+      Alert.alert("Error", "No session found! Please log in again.");
+    }
+  }, [user]);
 
   const handleFeedbackChange = (category, rating) => {
     setFeedback({ ...feedback, [category]: rating });
   };
 
-  const handleSubmit = () => {
-    // Handle submission logic here
-    console.log('Feedback submitted:', feedback);
-    alert("Successfully Submitted");
+  const handleSubmit = async () => {
+    if (!user) {
+      Alert.alert("Error", "User is not logged in. Please login again.");
+      return;
+    }
+
+    try {
+      console.log("Submitting feedback for user ID:", user.id); // Log user ID before sending
+      const res = await axios.post(
+        "https://mess-management-system-be-1.onrender.com/student/feedback",
+        {
+          userId: user.id,
+          FeedbackDuration: "2024-12-01 to 2024-12-15",
+          ...feedback,
+        }
+      );
+      console.log("Feedback submitted:", feedback);
+      Alert.alert("Success", "Feedback successfully submitted!");
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      Alert.alert("Error", "There was an issue submitting your feedback.");
+    }
   };
 
+  const isSubmitDisabled = Object.values(feedback).includes(null);
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Feedback</Text>
+    <ScrollView style={{ flex: 1, padding: 20 }}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Feedback</Text>
+        </View>
+        <View style={styles.form}>
+          {categories.map((category) => (
+            <View style={styles.category} key={category}>
+              <Text style={styles.categoryTitle}>
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </Text>
+              <View style={styles.ratingContainer}>
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <TouchableOpacity
+                    key={rating}
+                    style={[
+                      styles.ratingButton,
+                      feedback[category] === rating && styles.selectedButton,
+                    ]}
+                    onPress={() => handleFeedbackChange(category, rating)}
+                  >
+                    <Text style={styles.ratingText}>{rating}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          ))}
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              isSubmitDisabled && styles.disabledButton,
+            ]}
+            onPress={handleSubmit}
+            disabled={isSubmitDisabled}
+          >
+            <Text style={styles.submitButtonText}>Submit Feedback</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.form}>
-        <View style={styles.category}>
-          <Text style={styles.categoryTitle}>Mess Surroundings</Text>
-          <View style={styles.ratingContainer}>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('surroundings', 'Ex')}
-            >
-              <Text style={styles.ratingText}>Ex</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('surroundings', 'Good')}
-            >
-              <Text style={styles.ratingText}>Good</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('surroundings', 'Poor')}
-            >
-              <Text style={styles.ratingText}>Poor</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.category}>
-          <Text style={styles.categoryTitle}>Timings</Text>
-          <View style={styles.ratingContainer}>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('timings', 'Ex')}
-            >
-              <Text style={styles.ratingText}>Ex</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('timings', 'Good')}
-            >
-              < Text style={styles.ratingText}>Good</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('timings', 'Poor')}
-            >
-              <Text style={styles.ratingText}>Poor</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.category}>
-          <Text style={styles.categoryTitle}>Taste</Text>
-          <View style={styles.ratingContainer}>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('taste', 'Ex')}
-            >
-              <Text style={styles.ratingText}>Ex</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('taste', 'Good')}
-            >
-              <Text style={styles.ratingText}>Good</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.ratingButton}
-              onPress={() => handleFeedbackChange('taste', 'Poor')}
-            >
-              <Text style={styles.ratingText}>Poor</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit Feedback</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#CCEEFF',
-    padding: 20,
+    backgroundColor: "#f9f9f9",
+    padding: 10,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   title: {
     fontSize: 24,
-    color: '#228B22',
+    fontWeight: "bold",
+    color: "#333",
   },
   form: {
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    marginTop: 10,
   },
   category: {
     marginBottom: 20,
   },
   categoryTitle: {
     fontSize: 18,
-    color: '#228B22',
+    fontWeight: "600",
+    color: "#555",
     marginBottom: 10,
   },
   ratingContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   ratingButton: {
-    padding: 10,
-    borderColor: '#228B22',
-    borderWidth: 1,
-    borderRadius: 5,
-    backgroundColor: '#FFF',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  selectedButton: {
+    backgroundColor: "#4caf50",
   },
   ratingText: {
-    color: '#228B22',
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
   },
   submitButton: {
-    backgroundColor: '#228B22',
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
+    backgroundColor: "#4caf50",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  disabledButton: {
+    backgroundColor: "#aaa",
   },
   submitButtonText: {
-    color: '#FFF',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
   },
 });
 
