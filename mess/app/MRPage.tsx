@@ -16,7 +16,8 @@ import IssueHistory from "../src/screens/Student/HistoryScreen";
 import AllIssues from "../src/screens/Student/AllIssuesScreen";
 import RepresentativePage from "../src/screens/Representative/RepresentativePage";
 import QualityInspection from "../src/screens/Representative/QualityInspection";
-import ViewIssues from "../src/screens/Coordinator/ViewIssues";
+import ViewIssues from "../src/screens/Coordinator/ViewIssues";import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+
 
 const Drawer = createDrawerNavigator();
 
@@ -31,10 +32,25 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
 
   return (
     <DrawerContentScrollView {...props}>
-      <DrawerItemList {...props} />
-      <View style={{ flexGrow: 1, justifyContent: "flex-end" }}>
-        <DrawerItem label="Logout" onPress={handleLogout} />
-      </View>
+      <DrawerItemList {...props} /> 
+      
+      
+      <DrawerItem
+        label="Logout"
+        onPress={handleLogout}
+        style={{
+          marginTop: 'auto', 
+          backgroundColor: '#007BFF', // Highlight with blue background
+          borderRadius: 5, // Rounded corners
+        }}
+        labelStyle={{
+          color: 'white', // White text color for contrast
+          fontWeight: 'bold', // Bold text for emphasis
+        }}
+        icon={() => (
+          <Ionicons name="log-out-outline" size={24} color="white" /> // Custom logout icon
+        )}
+      />
     </DrawerContentScrollView>
   );
 };
@@ -57,17 +73,23 @@ const MRPage = ({ navigation }: StudentPageProps) => {
       initialRouteName="RepresentativePage"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
-        drawerType: "slide",
+        headerTitle: 'Menu', // Set header title as 'Menu' for each screen
         drawerStyle: {
           backgroundColor: "#fff",
           width: 240,
-          shadowColor: "#000",
-          shadowOpacity: 0.8,
-          shadowRadius: 8,
-          elevation: 5, // Android-specific shadow
         },
-        overlayColor: "rgba(0,0,0,0.5)",
-        drawerPosition: "left",
+        drawerLabelStyle: {
+          fontWeight: 'bold', // Bold labels in the drawer
+        },
+        drawerHeaderStyle: {
+          backgroundColor: '#007BFF', // Set background color for drawer header
+          height: 120, // Set height of the header
+        },
+        drawerHeaderTitleStyle: {
+          color: 'white', // Set color of the title text to white
+          fontSize: 22, // Increase font size for the title
+          fontWeight: 'bold', // Make title bold
+        },
       }}
     >
       <Drawer.Screen name="RepresentativePage" component={RepresentativePage} />

@@ -10,7 +10,9 @@ import {
 import { useSession } from "../../SessionContext"; // Import context
 import axios from "axios";
 
+
 const LoginPage = ({ navigation }) => {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useSession(); // Access the login function from context

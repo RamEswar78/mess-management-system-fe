@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Picker,
 } from "react-native";
-import { useSession } from "../SessionContext"; // Import the session context
+import { useSession } from "../../SessionContext"; 
+import { Picker } from "@react-native-picker/picker"; // Updated Picker import
+// Import the session context
 
 const Admin = ({ navigation }) => {
   const { user, logout } = useSession(); // Access session data and logout function
@@ -18,21 +19,7 @@ const Admin = ({ navigation }) => {
   const [role, setRole] = useState("");
   const [mess, setMess] = useState("");
 
-  // Redirect to login if the user is not an admin
-  if (!user || user.role !== "admin") {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Access Denied. Admin Login Required.</Text>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate("Login")} // Redirect to login screen
-        >
-          <Text style={styles.loginButtonText}>Go to Login</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
+ 
   const handleRegister = () => {
     if (!name || !email || !password || !role || (role === "Mess Representative" && !mess)) {
       Alert.alert("Error", "Please fill in all the fields.");
@@ -57,18 +44,12 @@ const Admin = ({ navigation }) => {
     setMess("");
   };
 
-  const handleLogout = () => {
-    logout(); // Call logout to clear the session
-    navigation.navigate("Login"); // Redirect to login screen
-  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Add User</Text>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
+        
       </View>
 
       {/* Name Input */}

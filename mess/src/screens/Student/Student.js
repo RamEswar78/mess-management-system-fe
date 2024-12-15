@@ -1,26 +1,77 @@
-import React from 'react';
-import { StyleSheet, View, Text, Image, FlatList } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, View, Text, Image, FlatList, Animated } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 
 const backgroundImage = require('../../../assets/images/background.png'); // Local image
 
 const StudentHomePage = () => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
   const messTimetable = [
-    { day: 'Monday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
-    { day: 'Tuesday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
-    { day: 'Wednesday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
-    { day: 'Thursday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
-    { day: 'Friday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
-    { day: 'Saturday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
-    { day: 'Sunday', breakfast: '8:00 AM', lunch: '1:00 PM', dinner: '8:00 PM' },
+    {
+      day: 'Monday',
+      breakfast: '1. Idly(4)\n2. Palli Chutney\n3. Boiled Egg\n4. Milk',
+      lunch: '1. Rice\n2. Thotakura/Palakura Pappu\n3. Alu Fry\n4. Rasam\n5. Curd\n6. Banana',
+      dinner: '1. Rice\n2. Vankaya Batani Curry\n3. Sambar\n4. Roti Chutney Cabbage\n5. Curd',
+    },
+    {
+      day: 'Tuesday',
+      breakfast: '1. Lemon/Tamarind Rice/Pongal\n2. Katta/Sambar\n3. Boiled Egg\n4. Milk',
+      lunch: '1. Rice\n2. Tomoto Pappu\n3. Dondakaya Fry\n4. Rasam\n5. Curd\n6. Banana',
+      dinner: '1. Rice\n2. Beerakaya Curry\n3. Sambar\n4. Tomoto Chutney\n5. Curd',
+    },
+    {
+      day: 'Wednesday',
+      breakfast: '1. Upma/Semya Upma\n2. Palli/Putnala Chutney\n3. Milk',
+      lunch: '1. Rice\n2. Chicken & Paneer\n3. Sweet\n4. Banana\n5. Curd',
+      dinner: '1. Rice\n2. Bendakaya Curry\n3. Sambar\n4. Mango Chutney\n5. Curd',
+    },
+    {
+      day: 'Thursday',
+      breakfast: '1. Vada (3 No’s)\n2. Palli Chutney\n3. Boiled Egg\n4. Milk',
+      lunch: '1. Rice\n2. Dosakaya Pappu\n3. Cabbage Fry\n4. Rasam\n5. Curd\n6. Banana',
+      dinner: '1. Rice\n2. Chikkudukay/Beans Curry\n3. Sambar\n4. Lemon Pickle\n5. Curd',
+    },
+    {
+      day: 'Friday',
+      breakfast: '1. Onion Uthappam\n2. Palli Chutney\n3. Boiled Egg\n4. Milk',
+      lunch: '1. Rice\n2. Sorakaya Pesarapappu\n3. Beetroot/Carrot Fry\n4. Rasam\n5. Curd\n6. Banana',
+      dinner: '1. Rice\n2. Alu Dum Fry\n3. Sambar\n4. Roti Chutney (Dondakaya)\n5. Curd',
+    },
+    {
+      day: 'Saturday',
+      breakfast: '1. Mysore Bajji (4)\n2. Palli Chutney\n3. Boiled Egg\n4. Milk',
+      lunch: '1. Rice\n2. Mudda Pappu\n3. Pachi Pulusu\n4. Avakaya Pickle\n5. Papad\n6. Banana\n7. Curd',
+      evening_snacks: '1. Atukulu (Chuduva)\n2. Tea',
+      dinner: '1. Rice\n2. Mixed Veg Fry (Alu+Carrot+Beans)\n3. Sambar\n4. Gongura Chutney\n5. Curd',
+    },
+    {
+      day: 'Sunday',
+      breakfast: '1. Chapathi\n2. Alukurma\n3. Milk',
+      lunch: '1. Veg Biryani Rice\n2. Chicken & Gutti Vankaya Curry\n3. Rytha\n4. Sambar\n5. Sweet',
+      evening_snacks: '1. Milk Biscuits (4)\n2. Tea',
+      dinner: '1. Rice\n2. Dosakaya Chutney\n3. Sambar\n4. Banana\n5. Curd',
+    },
   ];
 
-  const renderRow = ({ item }) => (
-    <View style={styles.row}>
-      <Text style={styles.cell}>{item.day}</Text>
-      <Text style={styles.cell}>{item.breakfast}</Text>
-      <Text style={styles.cell}>{item.lunch}</Text>
-      <Text style={styles.cell}>{item.dinner}</Text>
-    </View>
+  const renderCard = ({ item }) => (
+    <Animatable.View animation="fadeInUp" style={styles.card}>
+      <Text style={styles.cardTitle}>{item.day}</Text>
+      <Text style={styles.cardMealTitle}>Breakfast:</Text>
+      <Text style={styles.cardMeal}>{item.breakfast}</Text>
+      <Text style={styles.cardMealTitle}>Lunch:</Text>
+      <Text style={styles.cardMeal}>{item.lunch}</Text>
+      <Text style={styles.cardMealTitle}>Dinner:</Text>
+      <Text style={styles.cardMeal}>{item.dinner}</Text>
+    </Animatable.View>
   );
 
   return (
@@ -44,108 +95,92 @@ const StudentHomePage = () => {
             <Text style={styles.headerCell}>Breakfast</Text>
             <Text style={styles.headerCell}>Lunch</Text>
             <Text style={styles.headerCell}>Dinner</Text>
+    <FlatList
+      data={messTimetable}
+      renderItem={renderCard}
+      keyExtractor={(item) => item.day}
+      contentContainerStyle={styles.container}
+      ListHeaderComponent={
+        <>
+          <View style={styles.logoContainer}>
+            <View style={styles.logo}>
+              <Image source={require('../../../assets/images/rgulogo2.png')} style={styles.logoImage} />
+            </View>
           </View>
-          <FlatList
-            data={messTimetable}
-            renderItem={renderRow}
-            keyExtractor={(item) => item.day}
-          />
-        </View>
-      </View>
-    </View>
+
+          <Text style={styles.tableHeader}>Mess Timetable</Text>
+        </>
+      }
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 10, // Reduced padding for better fit on the screen
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
-    borderRadius: 10,
-    margin: 10,
+    padding: 20,
+    backgroundColor: '#e3f2fd',
   },
   logoContainer: {
-    flexDirection: 'column', // Align logo and text vertically
-    alignItems: 'center', // Center vertically
-    marginTop: 0, // Added margin to space out from top
-    marginBottom: 15, // Added margin between logo and title
-  },
-  logo: {
-    width: 90, // Reduced width for logo background circle
-    height: 90, // Reduced height for logo background circle
-    backgroundColor: '#1E7C2F',
-    borderRadius: 45, // Circular background for the logo
+    position: 'absolute', // Position the logo in the top-left
+    top: -13, // Distance from the top
+    left: 5, // Distance from the left
+    width: 50, // Reduced width
+    height: 50, // Reduced height
+    backgroundColor: '#2196f3',
+    borderRadius: 35, // Half of width/height for circular shape
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10, // Space between logo and text
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    zIndex: 1, // Ensure the logo is above other content
+  },
+  logo: {
+    top: 3,
+    width: 50, // Adjusted inner logo width
+    height: 50, // Adjusted inner logo height
+    alignItems: 'center',
+    borderRadius: 25,
   },
   logoImage: {
-    width: 60, // Reduced size for logo image
-    height: 60,
-    borderRadius: 30, // Circular logo image
+    width: 45, // Adjusted logo image size
+    height: 45,
+    borderRadius: 25,
   },
-  title: {
-    color: '#1E7C2F',
-    fontSize: 20, // Reduced font size for title
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  header: {
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  headerText: {
-    fontSize: 20, // Adjusted font size for welcome message
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginTop: 10,
-  },
-  tableContainer: {
-    marginTop: 15,
-  },
+
   tableHeader: {
-    fontSize: 18, // Adjusted font size for timetable header
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#2E7D32',
+    color: '#0d47a1',
     textAlign: 'center',
   },
-  table: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 15,
+    marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: 4,
   },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2196f3',
+    marginBottom: 5,
   },
-  cell: {
-    flex: 1,
-    padding: 12, // Reduced padding for better fit
-    textAlign: 'center',
-    fontSize: 14, // Reduced font size
+  cardMealTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#333',
   },
-  headerCell: {
-    flex: 1,
-    padding: 12,
-    textAlign: 'center',
-    fontSize: 14, // Adjusted font size for header cells
-    fontWeight: 'bold',
-    backgroundColor: '#4CAF50',
-    color: '#fff',
+  cardMeal: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 10,
   },
 });
 

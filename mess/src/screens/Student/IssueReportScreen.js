@@ -20,6 +20,32 @@ const ReportIssue = () => {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
 
+  const requestStoragePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'This app needs access to your storage to upload images.',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    return true; // Permission is automatically granted on iOS
+  };
+  
+
+  const handleImageUpload = async () => {
+    const permissionGranted = await requestStoragePermission();
+    if (!permissionGranted) {
+      Alert.alert('Permission Denied', 'Storage access is required to upload images.');
   useEffect(() => {
     if (user) {
       setRole(user.role);

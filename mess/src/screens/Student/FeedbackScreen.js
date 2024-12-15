@@ -43,7 +43,16 @@ const FeedbackForm = () => {
   }, [user]);
 
   const handleFeedbackChange = (category, rating) => {
-    setFeedback({ ...feedback, [category]: rating });
+    setFeedback((prev) => ({
+      ...prev,
+      [category]: prev[category] === rating ? null : rating, // Toggle selection
+    }));
+  };
+
+  const isSelected = (category, rating) => feedback[category] === rating;
+
+  const isFormComplete = () => {
+    return Object.values(feedback).every((value) => value !== null);
   };
 
   const handleSubmit = async () => {
@@ -124,6 +133,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
+    alignItems: "center",
     marginBottom: 20,
   },
   title: {
@@ -135,7 +145,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   category: {
-    marginBottom: 20,
+    marginBottom: 25,
   },
   categoryTitle: {
     fontSize: 18,
@@ -180,3 +190,4 @@ const styles = StyleSheet.create({
 });
 
 export default FeedbackForm;
+
