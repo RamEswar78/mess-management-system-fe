@@ -1,13 +1,10 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import DrawerNavigator from "../src/navigations/DrawerNavigator";
-
-const RootNavigator = () => {
-  return (  
-      <NavigationContainer>
-        <DrawerNavigator />
-      </NavigationContainer>
+import { Stack } from 'expo-router';
+import React from 'react';
+export default function RootLayout() {
+  return (
+    <Stack screenOptions={{headerShown:false}}>
+      <Stack.Screen name="(student)" options={{ title: 'Home' }} />
+      <Stack.Screen name="(coordinator)" options={{ title: 'About' }} />
+    </Stack>
   );
-};
-
-export default RootNavigator;
+}

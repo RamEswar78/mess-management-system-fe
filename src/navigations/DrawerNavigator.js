@@ -1,8 +1,7 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { useUserRole } from "../context/UserContext"; // Context to get user role
-
-import BottomTabsNavigator from "./BottomTabsNavigator";
+const userRole ="student"
+import BottomTabsNavigator from "./TabsNavigator";
 import SessionManager from "../utils/SessionManager";
 
 // Save a user role
@@ -26,7 +25,7 @@ const clearSession = async () => {
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = () => {
-  const { userRole } = useUserRole(); // Assume userRole is fetched (e.g., 'admin', 'student', 'coordinator')
+  // const { userRole } = useUserRole(); // Assume userRole is fetched (e.g., 'admin', 'student', 'coordinator')
 
   // Define screens based on roles
   const getDrawerScreens = () => {
