@@ -1,5 +1,13 @@
-import { Stack } from "expo-router";
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import DrawerNavigator from "../src/navigations/DrawerNavigator";
 
-export default function RootLayout() {
-  return <Stack />;
-}
+const RootNavigator = () => {
+  return (  
+      <NavigationContainer>
+        <DrawerNavigator />
+      </NavigationContainer>
+  );
+};
+
+export default RootNavigator;
